@@ -48,7 +48,7 @@
 
            <tr>
             <td><?php echo $entry_currency; ?></td>
-            <td><input type="text" name="payu_currency" value="<?php echo ($payu_currency == "") ? "UAH" : $payu_currency; ?>" /></td>
+            <td><input type="text" name="payu_currency" value="<?php echo ($payu_currency == "") ? "RUB" : $payu_currency; ?>" /></td>
           </tr>  
 
            <tr>

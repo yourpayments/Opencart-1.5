@@ -63,6 +63,19 @@
           </tr>  
 
            <tr>
+            <td><?php echo $entry_order_type; ?></td>
+            <td><select name="payu_entry_order_type">
+                <? $st0 = $st1 = ""; 
+                 if ( $payu_entry_order_type == 0 ) $st0 = 'selected="selected"';
+                  else $st1 = 'selected="selected"';
+                ?>
+
+                <option value="0" <?= $st0 ?> ><?php echo $entry_order_net; ?></option>
+                <option value="1" <?= $st1 ?> ><?php echo $entry_order_gross; ?></option>
+               </select></td>
+          </tr>  
+
+           <tr>
             <td><?php echo $entry_language; ?></td>
             <td><input type="text" name="payu_language" value="<?php echo ($payu_language == "") ? "RU" : $payu_language; ?>" /></td>
           </tr> 

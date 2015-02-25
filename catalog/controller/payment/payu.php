@@ -32,6 +32,7 @@ class ControllerPaymentPayU extends Controller {
 
 		if ( $this->config->get('payu_LU') != "" ) $option['luUrl'] = $this->config->get('payu_LU');
 
+		if (intval($this->config->get('payu_entry_order_type') == 0)) $vat_type = 'NET'; else $vat_type = 'GROSS';
 
 		$shipp = $order_info['total'];
 		foreach ( $goods as $v )
@@ -43,6 +44,7 @@ class ControllerPaymentPayU extends Controller {
 			$price[] = $v['price'];
 			$vat[] = $this->config->get('payu_vat'); 
 			$shipp -= $v['price'] * $v['quantity'];
+			$or_pr_ty[] = $vat_type;
 		}
 
 		$forSend = array (
@@ -55,6 +57,7 @@ class ControllerPaymentPayU extends Controller {
 					'ORDER_VAT' => $vat,
 					'ORDER_SHIPPING' => $shipp, 
 					'PRICES_CURRENCY' => $this->config->get('payu_currency'),  # Currency
+					"ORDER_PRICE_TYPE" => $or_pr_ty,
 					'LANGUAGE' => $this->config->get('payu_language'),
 				  );
 		if ( $this->config->get('payu_backref') != "" ) $forSend['BACK_REF'] = $this->config->get('payu_backref');
@@ -75,7 +78,6 @@ class ControllerPaymentPayU extends Controller {
 
 		$pay = PayU::getInst()->setOptions( $option )->setData( $forSend )->LU();
 		$this->data['pay'] = $pay;
-
 
 		if (file_exists(DIR_TEMPLATE . $this->config->get('config_template') . '/template/payment/payu.tpl')) {
 			$this->template = $this->config->get('config_template') . '/template/payment/payu.tpl';
@@ -117,7 +119,7 @@ class PayU
 	private $data = array(), $dataArr = array(), $answer = ""; 
 	private $LUcell = array( 'MERCHANT' => 1, 'ORDER_REF' => 0, 'ORDER_DATE' => 1, 'ORDER_PNAME' => 1, 'ORDER_PGROUP' => 0,
 							'ORDER_PCODE' => 1, 'ORDER_PINFO' => 0, 'ORDER_PRICE' => 1, 'ORDER_QTY' => 1, 'ORDER_VAT' => 1, 
-							'ORDER_SHIPPING' => 1, 'PRICES_CURRENCY' => 1, 'PAY_METHOD' => 0, 'ORDER_PRICE_TYPE' => 0);
+							'ORDER_SHIPPING' => 1, 'PRICES_CURRENCY' => 1, 'PAY_METHOD' => 0, 'ORDER_PRICE_TYPE' => 1);
 
 	private $IPNcell = array( "IPN_PID", "IPN_PNAME", "IPN_DATE", "ORDERSTATUS" );
 

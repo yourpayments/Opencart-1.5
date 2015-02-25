@@ -21,6 +21,9 @@ $_['entry_order_status'] = 'Order status after payment:';
 $_['entry_currency']     = 'Currency : ';
 $_['entry_backref']      = 'Back refference :<br /><span class="help">if empty - client will stay at PayU page</span>';
 $_['entry_vat']       	 = 'VAT:<br /><span class="help">0 - without VAT</span>';
+$_['entry_order_type']   = 'VAT included in order amount<br /><span class="help">Yes / No</span>';
+$_['entry_order_net']    = 'No';
+$_['entry_order_gross']  = 'Yes';
 $_['entry_language']     = 'Payment page language :<br /><span class="help">default : RU </span>';
 
 $_['entry_status']       = 'Status:';

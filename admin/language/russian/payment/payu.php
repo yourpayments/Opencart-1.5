@@ -21,6 +21,9 @@ $_['entry_order_status'] = 'Статус заказа после оплаты:';
 $_['entry_currency']     = 'Валюта мерчанта';
 $_['entry_backref']      = 'Ссылка возврата клиента:<br /><span class="help">Если оставить пустым - клиент останется в системе PayU</span>';
 $_['entry_vat']       	 = 'Процент НДС:<br /><span class="help">0 - без НДС</span>';
+$_['entry_order_type']   = 'НДС включен в сумму заказа<br /><span class="help">Да / Нет</span>';
+$_['entry_order_net']    = 'Нет';
+$_['entry_order_gross']  = 'Включен';
 $_['entry_language']     = 'Язык страницы:<br /><span class="help">по-умолчанию : RU </span>';
 
 $_['entry_status']       = 'Статус:';

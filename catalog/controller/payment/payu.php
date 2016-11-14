@@ -1,90 +1,33 @@
 <?php
-class ControllerPaymentPayU extends Controller {
-	protected function index() {
-
-		$order_id = $this->session->data['order_id'];
-
-		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "order_product WHERE order_id = '" . (int)$order_id . "'");
-		$goods = $query->rows;
-
+class ControllerPaymentPayU extends Controller
+{
+	protected function index()
+	{	
 		$this->data['button_confirm'] = $this->language->get('button_confirm');
-		
-		$this->load->model('checkout/order');
-		$order_info = $this->model_checkout_order->getOrder($this->session->data['order_id']);
 
-		$pref = array( "FNAME" => "firstname", 
-					  "LNAME" => "lastname", 
-					  "ADDRESS" => "address_1", 
-					  "ADDRESS2" => "address_2", 
-					  "ZIPCODE" => "postcode", 
-					  "CITY" => "city", 
-					);
-		$nopref = array( "EMAIL" => "email", 
-					  	 "PHONE" => "telephone", 
-					  	 "FAX" => "fax", );
+		$option  = array(
+			'merchant' => $this->config->get('payu_merchant'), 
+			'secretkey' => $this->config->get('payu_secretkey'), 
+			'debug' => $this->config->get('payu_debug'),
+			'button' => '<input type="submit" value="'.$this->data['button_confirm'].'" class="button" style="float: right;" />'
+		);
 
-
-				
-		$option  = array(   'merchant' => $this->config->get('payu_merchant'), 
-							'secretkey' => $this->config->get('payu_secretkey'), 
-							'debug' => $this->config->get('payu_debug'),
-							'button' => '<input type="submit" value="'.$this->data['button_confirm'].'" class="button" style="float: right;" />' );
-
-		if ( $this->config->get('payu_LU') != "" ) $option['luUrl'] = $this->config->get('payu_LU');
-
-		if (intval($this->config->get('payu_entry_order_type') == 0)) $vat_type = 'NET'; else $vat_type = 'GROSS';
-
-		$shipp = $order_info['total'];
-		foreach ( $goods as $v )
-		{
-			$pid[] = $v['product_id'];
-			$pname[] = $v['name'];
-			$pinfo[] = $v['model'];
-			$qty[] = $v['quantity'];
-			$price[] = $v['price'];
-			$vat[] = $this->config->get('payu_vat'); 
-			$shipp -= $v['price'] * $v['quantity'];
-			$or_pr_ty[] = $vat_type;
+		if ($this->config->get('payu_LU') != "") {
+			$option['luUrl'] = $this->config->get('payu_LU');
 		}
 
-		$forSend = array (
-					'ORDER_REF' => $order_id,
-					'ORDER_PNAME' => $pname,
-					'ORDER_PCODE' => $pid,
-					'ORDER_PINFO' => $pinfo,
-					'ORDER_PRICE' => $price,
-					'ORDER_QTY' => $qty,
-					'ORDER_VAT' => $vat,
-					'ORDER_SHIPPING' => $shipp, 
-					'PRICES_CURRENCY' => $this->config->get('payu_currency'),  # Currency
-					"ORDER_PRICE_TYPE" => $or_pr_ty,
-					'LANGUAGE' => $this->config->get('payu_language'),
-				  );
-		if ( $this->config->get('payu_backref') != "" ) $forSend['BACK_REF'] = $this->config->get('payu_backref');
+		$forSend = $this->buildPayUOrder();
+		$pay = PayU::getInst()->setOptions($option)->setData($forSend)->LU();
 
-		foreach ($pref as $k => $v)
-		{
-			$bill = "payment_".$v;
-			$deliv = "shipping_".$k;
-			if (  isset( $order_info[$bill] ) ) $forSend["BILL_".$k] = $order_info[$bill];
-			if (  isset( $order_info[$deliv] ) ) $forSend["DELIVERY_".$k] = $order_info[$deliv];
-		}
-
-		foreach ($nopref as $k => $v) 
-		{
-			$forSend["BILL_".$k] = $order_info[$v];
-			$forSend["DELIVERY_".$k] = $order_info[$v];
-		}
-
-		$pay = PayU::getInst()->setOptions( $option )->setData( $forSend )->LU();
 		$this->data['pay'] = $pay;
+		
 
 		if (file_exists(DIR_TEMPLATE . $this->config->get('config_template') . '/template/payment/payu.tpl')) {
 			$this->template = $this->config->get('config_template') . '/template/payment/payu.tpl';
 		} else {
 			$this->template = 'default/template/payment/payu.tpl';
-		}	
-	/**/	
+		}
+
 		$this->render();
 	}
 
@@ -137,6 +80,64 @@ class ControllerPaymentPayU extends Controller {
 		);
 
 		$this->response->setOutput($this->render());
+	}
+
+	protected function buildPayUOrder()
+	{
+		$this->load->model('checkout/order');
+
+		$order_id = $this->session->data['order_id'];
+		$order_info = $this->model_checkout_order->getOrder($this->session->data['order_id']);
+
+		$ret = array(
+			'ORDER_REF'        => $order_id,
+			'ORDER_PNAME'      => array(),
+			'ORDER_PCODE'      => array(),
+			'ORDER_PINFO'      => array(),
+			'ORDER_PRICE'      => array(),
+			'ORDER_QTY'        => array(),
+			'ORDER_VAT'        => array(),
+			'ORDER_PRICE_TYPE' => array(),
+			'ORDER_SHIPPING'   => $order_info['total'],
+			'PRICES_CURRENCY'  => $this->config->get('payu_currency'),
+			'LANGUAGE'         => $this->config->get('payu_language'),
+			'BACK_REF'         => $this->config->get('payu_backref'),
+		);
+
+		foreach ($this->cart->getProducts() as $item) {
+			$unitPrice = $this->tax->calculate($item['price'], $item['tax_class_id'], $this->config->get('config_tax'));
+
+			$ret['ORDER_PNAME'][]      = $item['name'];
+			$ret['ORDER_PCODE'][]      = $item['product_id'];
+			$ret['ORDER_PINFO'][]      = $item['model'];
+			$ret['ORDER_PRICE'][]      = $unitPrice;
+			$ret['ORDER_QTY'][]        = $item['quantity'];
+			$ret['ORDER_VAT'][]        = $this->config->get('payu_vat');
+			$ret['ORDER_PRICE_TYPE'][] = intval($this->config->get('payu_entry_order_type')) == 0 ? 'NET' : 'GROSS';
+			$ret['ORDER_SHIPPING']    -= $unitPrice * $item['quantity'];
+		}
+
+		$pref = array("FNAME" => "firstname", "LNAME" => "lastname", "ADDRESS" => "address_1", "ADDRESS2" => "address_2", "ZIPCODE" => "postcode", "CITY" => "city");
+		foreach ($pref as $k => $v) {
+			$bill = "payment_".$v;
+			$deliv = "shipping_".$k;
+
+			if (isset($order_info[$bill])) {
+				$ret["BILL_".$k] = $order_info[$bill];
+			}
+
+			if (isset($order_info[$deliv])) {
+				$ret["DELIVERY_".$k] = $order_info[$deliv];
+			}
+		}
+
+		$nopref = array("EMAIL" => "email", "PHONE" => "telephone", "FAX" => "fax");
+		foreach ($nopref as $k => $v) {
+			$ret["BILL_".$k] = $order_info[$v];
+			$ret["DELIVERY_".$k] = $order_info[$v];
+		}
+
+		return $ret;
 	}
 }
 

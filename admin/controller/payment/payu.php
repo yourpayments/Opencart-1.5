@@ -19,7 +19,7 @@ class ControllerPaymentPayU extends Controller {
 				"entry_merchant", "entry_secretkey", "entry_debug", "entry_LU", "entry_order_status", 
 				"entry_currency", "entry_backref", "entry_vat", "entry_order_type", "entry_language", "entry_status", 
 				"entry_sort_order", "error_permission", "error_merchant", "error_secretkey",
-				"entry_debug_on", "entry_debug_off", "entry_order_net", "entry_order_gross" );
+				"entry_debug_on", "entry_debug_off", "entry_order_net", "entry_order_gross", "entry_ipn" );
 
 		foreach ($arr as $v) $this->data[$v] = $this->language->get($v);
 		$this->data['button_save'] = $this->language->get('button_save');
@@ -70,6 +70,10 @@ class ControllerPaymentPayU extends Controller {
 		{
 			$this->data[$v] = ( isset($this->request->post[$v]) ) ? $this->request->post[$v] : $this->config->get($v);
 		}
+
+		$this->data['payu_LU']      = is_null($this->data['payu_LU']) ? 'https://secure.payu.ru/order/lu.php' : $this->data['payu_LU'];
+		$this->data['payu_backref'] = is_null($this->data['payu_backref']) ? HTTPS_CATALOG . 'index.php?route=payment/payu/result_payment' : $this->data['payu_backref'];
+		$this->data['payu_ipn']     = HTTPS_CATALOG . 'index.php?route=payment/payu/callback';
 //------------------------------------------------------------
 
 		$this->template = 'payment/payu.tpl';

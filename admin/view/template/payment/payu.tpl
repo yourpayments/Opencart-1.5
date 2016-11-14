@@ -41,21 +41,27 @@
                 <option value="0" <?= $st0 ?> ><?php echo $entry_debug_off; ?></option>
               </select></td>
           </tr>
+          
           <tr>
             <td><?php echo $entry_LU; ?></td>
-            <td><input type="text" name="payu_LU" value="<?php echo $payu_LU; ?>" /></td>
+            <td><input type="text" name="payu_LU" value="<?php echo $payu_LU; ?>" size="70" /></td>
           </tr>      
 
-           <tr>
+
+          <tr>
+            <td><?php echo $entry_backref; ?></td>
+            <td><input type="text" name="payu_backref" value="<?php echo $payu_backref; ?>" size="70" /></td>
+          </tr>
+
+          <tr>
+            <td><?= $entry_ipn ?></td>
+            <td><input type="text" value="<?= $payu_ipn ?>" readonly="yes" size="70" /></td>
+          </tr>
+
+          <tr>
             <td><?php echo $entry_currency; ?></td>
             <td><input type="text" name="payu_currency" value="<?php echo ($payu_currency == "") ? "RUB" : $payu_currency; ?>" /></td>
           </tr>  
-
-           <tr>
-            <td><?php echo $entry_backref; ?></td>
-            <td><input type="text" name="payu_backref" value="<?php echo $payu_backref; ?>" /></td>
-          </tr>  
-
 
            <tr>
             <td><?php echo $entry_vat; ?></td>

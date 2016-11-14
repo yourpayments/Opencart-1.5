@@ -103,6 +103,41 @@ class ControllerPaymentPayU extends Controller {
 		$order_info = $this->model_checkout_order->getOrder($order_id);
 		$this->model_checkout_order->confirm($order_id, $this->config->get('payu_order_status_id') );
 	}
+
+	public function result_payment()
+	{
+		$this->load->language('payment/payu');
+
+		$message = '';
+		if (isset($_GET['err'])) {
+			$message = $_GET['err'] .'<br>';
+		}
+
+		$result = isset($_GET['result']) ? $_GET['result'] : '';
+		switch ($result) {
+			case '-1': $message .= $this->language->get('payment_result_qiwi'); break;
+			case '0' : $message .= $this->language->get('payment_result_success'); break;
+			case '1' : $message .= $this->language->get('payment_result_failure'); break;
+			default  : $message .= $this->language->get('payment_result_empty'); break;
+		}
+
+		$this->data['heading_title'] = $this->language->get('heading_title');
+		$this->data['heading_subtitle'] = $this->language->get('heading_subtitle');
+		$this->data['message'] = $message;
+
+		if (file_exists(DIR_TEMPLATE . $this->config->get('config_template') . '/template/payment/payu_result.tpl')) {
+			$this->template = $this->config->get('config_template') . '/template/payment/payu_result.tpl';
+		} else {
+			$this->template = 'default/template/payment/payu_result.tpl';
+		}	
+
+		$this->children = array(
+			'common/header',
+			'common/footer'
+		);
+
+		$this->response->setOutput($this->render());
+	}
 }
 
 

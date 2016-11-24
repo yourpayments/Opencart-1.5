@@ -16,10 +16,11 @@ $_['entry_debug']        = 'Режим отладки:';
 $_['entry_debug_on']     = 'Включен';
 $_['entry_debug_off']    = 'Выключен';
 
-$_['entry_LU']        	 = 'Ссылка Live Update:<br /><span class="help">По-умолчанию стоит стандартная ссылка для украинских мерчантов</span>';
+$_['entry_LU']        	 = 'Ссылка Live Update:<br /><span class="help">По-умолчанию стоит стандартная ссылка для российских и украинских мерчантов</span>';
+$_['entry_backref']      = 'Ссылка возврата клиента:<br /><span class="help">Если оставить пустым - клиент останется в системе PayU</span>';
+$_['entry_ipn']          = 'IPN URL';
 $_['entry_order_status'] = 'Статус заказа после оплаты:';
 $_['entry_currency']     = 'Валюта мерчанта';
-$_['entry_backref']      = 'Ссылка возврата клиента:<br /><span class="help">Если оставить пустым - клиент останется в системе PayU</span>';
 $_['entry_vat']       	 = 'Процент НДС:<br /><span class="help">0 - без НДС</span>';
 $_['entry_order_type']   = 'НДС включен в сумму заказа<br /><span class="help">Да / Нет</span>';
 $_['entry_order_net']    = 'Нет';

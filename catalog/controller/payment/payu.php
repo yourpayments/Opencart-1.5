@@ -98,11 +98,36 @@ class ControllerPaymentPayU extends Controller
 			'ORDER_QTY'        => array(),
 			'ORDER_VAT'        => array(),
 			'ORDER_PRICE_TYPE' => array(),
-			'ORDER_SHIPPING'   => $order_info['total'],
+			'ORDER_SHIPPING'   => 0,
 			'PRICES_CURRENCY'  => $this->config->get('payu_currency'),
+			'DISCOUNT'         => 0,
 			'LANGUAGE'         => $this->config->get('payu_language'),
 			'BACK_REF'         => $this->config->get('payu_backref'),
 		);
+		
+		$total_data = array();
+		$total = 0;
+		$taxes = $this->cart->getTaxes();
+
+		$this->load->model('setting/extension');
+		$results = $this->model_setting_extension->getExtensions('total');
+
+		foreach ($results as $result) {
+			if ($this->config->get($result['code'] . '_status')) {
+				$this->load->model('total/' . $result['code']);
+				$this->{'model_total_' . $result['code']}->getTotal($total_data, $total, $taxes);
+			}
+		}
+		
+		foreach ($total_data as $tl) {
+			
+			if($tl["value"] < 0)
+				$ret['DISCOUNT'] -= $tl["value"];
+		
+			if($tl["code"] == "shipping")
+				$ret['ORDER_SHIPPING'] = $tl["value"];	
+		
+		}		
 
 		foreach ($this->cart->getProducts() as $item) {
 			$unitPrice = $this->tax->calculate($item['price'], $item['tax_class_id'], $this->config->get('config_tax'));
@@ -114,7 +139,6 @@ class ControllerPaymentPayU extends Controller
 			$ret['ORDER_QTY'][]        = $item['quantity'];
 			$ret['ORDER_VAT'][]        = $this->config->get('payu_vat');
 			$ret['ORDER_PRICE_TYPE'][] = intval($this->config->get('payu_entry_order_type')) == 0 ? 'NET' : 'GROSS';
-			$ret['ORDER_SHIPPING']    -= $unitPrice * $item['quantity'];
 		}
 
 		$pref = array("FNAME" => "firstname", "LNAME" => "lastname", "ADDRESS" => "address_1", "ADDRESS2" => "address_2", "ZIPCODE" => "postcode", "CITY" => "city");
@@ -172,8 +196,9 @@ class PayU
 			'ORDER_VAT' => 1, 
 			'ORDER_SHIPPING' => 1, 
 			'PRICES_CURRENCY' => 1, 
-			'PAY_METHOD' => 0, 
-			'ORDER_PRICE_TYPE' => 1
+			'DISCOUNT' => 0,
+			'PAY_METHOD' => 0,
+			'ORDER_PRICE_TYPE' => 1,
 		);
 
 	private $IPNcell = array(

@@ -67,8 +67,8 @@
             <td><?php echo $entry_vat; ?></td>
             <td>
               <select name="payu_vat">
-                <option value="0" <?= $payu_vat != '19' ? 'selected="seleted"' : '' ?>>0%</option>
-                <option value="19" <?= $payu_vat == '19' ? 'selected="seleted"' : '' ?>>18%</option>
+                <option value="0" <?= $payu_vat != '21' ? 'selected="seleted"' : '' ?>>0%</option>
+                <option value="21" <?= $payu_vat == '21' ? 'selected="seleted"' : '' ?>>20%</option>
               </select>
             </td>
           </tr>  
